@@ -1,619 +1,4 @@
-<!doctype html>
-<html lang="pt-br">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Captação Ensino Superior | Funil Invisível</title>
 
-<style>
-:root{
-  --bg1:#070b14; --bg2:#0b1220;
-  --text:#eaf1ff; --muted:#92a4c0;
-  --line:#1f335a;
-  --accent:#35c3ff;
-  --accent2:#6cffb1;
-}
-*{box-sizing:border-box}
-body{
-  margin:0;
-  font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Arial;
-  background:linear-gradient(120deg,var(--bg1),var(--bg2));
-  color:var(--text);
-}
-.wrap{max-width:980px;margin:auto;padding:20px}
-.topbar{display:flex;justify-content:space-between;align-items:center;position:relative;margin-bottom:14px}
-.brand{display:flex;align-items:center;gap:12px}
-.logo{
-  width:42px;height:42px;border-radius:14px;
-  background:linear-gradient(135deg,var(--accent),var(--accent2))
-}
-h1{margin:0;font-size:16px}
-.sub{color:var(--muted);font-size:12px;margin:0}
-
-.card{
-  background:rgba(15,27,51,.8);
-  border:1px solid rgba(31,51,90,.7);
-  border-radius:18px;
-  padding:16px;
-  margin-bottom:14px
-}
-
-/* Botão secreto admin */
-.secret{
-  position:absolute;top:10px;right:10px;
-  width:16px;height:16px;border-radius:50%;
-  border:none;background:rgba(146,164,192,.30);
-  cursor:pointer
-}
-
-/* CHAT */
-.chatBox{
-  background:rgba(10,19,38,.6);
-  border-radius:16px;
-  padding:12px;
-  min-height:180px;
-  max-height:320px;
-  overflow:auto;
-  border:1px solid rgba(31,51,90,.6)
-}
-.msg{
-  padding:10px 12px;
-  border-radius:14px;
-  margin:8px 0;
-  max-width:85%
-}
-.bot{background:rgba(53,195,255,.08)}
-.user{background:rgba(108,255,177,.10);margin-left:auto}
-
-.quick{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
-.qbtn{
-  padding:10px 12px;
-  border-radius:14px;
-  border:1px solid rgba(31,51,90,.85);
-  background:transparent;
-  color:var(--text);
-  cursor:pointer;
-  font-weight:800
-}
-/* ✅ Destaque só quando ADM LIGAR e item estiver marcado */
-.qbtn.highlight{
-  background:linear-gradient(135deg,var(--accent),#1a7cff);
-  color:#061023;
-  border:none;
-}
-
-/* FORM */
-label{font-size:12px;color:var(--muted);display:block;margin-top:10px}
-input,select{
-  width:100%;
-  padding:12px;
-  border-radius:12px;
-  border:1px solid rgba(31,51,90,.8);
-  background:rgba(10,19,38,.8);
-  color:var(--text)
-}
-.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-@media(max-width:720px){.row{grid-template-columns:1fr}}
-
-button.main{
-  margin-top:12px;
-  padding:12px 14px;
-  border-radius:14px;
-  border:none;
-  background:linear-gradient(135deg,var(--accent),#1a7cff);
-  font-weight:900;
-  cursor:pointer;
-  color:#061023;
-}
-button.ghost{
-  background:transparent;
-  border:1px solid rgba(31,51,90,.85);
-  color:var(--text)
-}
-
-/* ADMIN */
-.admin{display:none}
-.kpis{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
-.kpi{
-  flex:1;min-width:150px;
-  background:rgba(10,19,38,.6);
-  border-radius:14px;
-  padding:10px;
-  border:1px solid rgba(31,51,90,.6)
-}
-table{width:100%;border-collapse:collapse;margin-top:12px;font-size:13px}
-th,td{border-bottom:1px solid rgba(31,51,90,.6);padding:8px;text-align:left}
-th{color:var(--muted)}
-
-.badge{
-  display:inline-flex;align-items:center;gap:6px;
-  padding:6px 10px;border-radius:999px;
-  border:1px solid rgba(31,51,90,.7);
-  color:var(--muted);font-size:12px;
-  background:rgba(10,19,38,.35);
-  cursor:pointer;
-  user-select:none;
-}
-.badge.on{
-  border-color:rgba(53,195,255,.6);
-  color:#cfeeff;
-  background:rgba(53,195,255,.10);
-}
-
-.switchLine{
-  display:flex;align-items:center;gap:10px;flex-wrap:wrap;
-  margin-top:10px;
-  padding:10px 12px;
-  border-radius:14px;
-  border:1px solid rgba(31,51,90,.6);
-  background:rgba(10,19,38,.35);
-}
-.small{font-size:12px;color:var(--muted);margin-top:8px}
-
-/* MODAL SENHA */
-.modal{
-  display:none;
-  position:fixed;inset:0;
-  background:rgba(0,0,0,.6);
-  align-items:center;justify-content:center
-}
-.modalContent{
-  background:rgba(15,27,51,.95);
-  padding:20px;
-  border-radius:16px;
-  width:100%;max-width:420px
-}
-</style>
-</head>
-
-<body>
-<div class="wrap">
-
-  <div class="topbar">
-    <div class="brand">
-      <div class="logo"></div>
-      <div>
-        <h1>Captação Ensino Superior</h1>
-        <p class="sub">Opções neutras • destaque só se o ADM ligar</p>
-      </div>
-    </div>
-    <button class="secret" id="openAdmin" title=" " aria-label="Admin"></button>
-  </div>
-
-  <!-- CHAT -->
-  <div class="card" id="chatCard">
-    <p style="margin:0 0 10px 0"><b>Vamos te ajudar em 3 passos 😊</b></p>
-    <div class="chatBox" id="chatBox"></div>
-    <div class="quick" id="quick"></div>
-    <p class="small">*Se você vir algum botão em destaque, foi porque o administrador ativou manualmente.</p>
-  </div>
-
-  <!-- FORM -->
-  <div class="card" id="formCard" style="display:none">
-    <h3 style="margin:0 0 6px 0">Finalizar cadastro</h3>
-    <p class="sub">Só mais alguns dados para contato.</p>
-
-    <input type="hidden" id="motivo">
-    <input type="hidden" id="cursoHidden">
-    <input type="hidden" id="modalidadeHidden">
-
-    <div class="row">
-      <div>
-        <label>Nome*</label>
-        <input id="nome">
-      </div>
-      <div>
-        <label>WhatsApp*</label>
-        <input id="telefone">
-      </div>
-    </div>
-
-    <div class="row">
-      <div>
-        <label>Cidade*</label>
-        <input id="cidade">
-      </div>
-      <div>
-        <label>E-mail</label>
-        <input id="email">
-      </div>
-    </div>
-
-    <div class="row">
-      <div>
-        <label>Curso</label>
-        <select id="curso">
-          <option>Administração</option>
-          <option>Ciências Contábeis</option>
-          <option>Direito</option>
-          <option>Enfermagem</option>
-          <option>Farmácia</option>
-          <option>Fisioterapia</option>
-          <option>Fonoaudiologia</option>
-          <option>Medicina Veterinária</option>
-          <option>Nutrição</option>
-          <option>Odontologia</option>
-          <option>Psicologia</option>
-          <option>Terapia Ocupacional</option>
-        </select>
-      </div>
-      <div>
-        <label>Modalidade</label>
-        <select id="modalidade">
-          <option>Presencial</option>
-          <option>Semi-presencial</option>
-          <option>EAD</option>
-        </select>
-      </div>
-    </div>
-
-    <label><input type="checkbox" id="lgpd"> Autorizo contato (LGPD)</label>
-
-    <button class="main" onclick="saveLead()">Enviar</button>
-    <button class="main ghost" onclick="backChat()">Voltar</button>
-  </div>
-
-  <!-- ADMIN -->
-  <div class="card admin" id="admin">
-    <h3 style="margin:0 0 8px 0">Administração</h3>
-    <p class="sub">Você decide se haverá destaque e quais itens ficam em evidência.</p>
-
-    <div class="kpis">
-      <div class="kpi"><b id="total">0</b><div class="sub">Total</div></div>
-      <div class="kpi"><b id="quentes">0</b><div class="sub">Quentes (score ≥ 70)</div></div>
-    </div>
-
-    <!-- ✅ Interruptor mestre -->
-    <div class="switchLine">
-      <label style="margin:0;display:flex;align-items:center;gap:10px;cursor:pointer">
-        <input type="checkbox" id="enableHighlights">
-        <b>Ativar Destaques no Chat</b>
-      </label>
-      <span class="sub">Padrão: DESLIGADO (nenhum botão azul).</span>
-    </div>
-
-    <hr style="border:none;border-top:1px solid rgba(31,51,90,.5);margin:14px 0">
-
-    <h4 style="margin:0 0 8px 0">Escolher destaques (somente se “Ativar Destaques” estiver ligado)</h4>
-
-    <div class="row">
-      <div class="card" style="margin:0;background:rgba(10,19,38,.35)">
-        <b>Motivo (etapa 1)</b>
-        <div id="cfgMotivos" style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap"></div>
-        <div class="small">Clique para ligar/desligar o destaque.</div>
-      </div>
-
-      <div class="card" style="margin:0;background:rgba(10,19,38,.35)">
-        <b>Modalidade (etapa 3)</b>
-        <div id="cfgMods" style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap"></div>
-        <div class="small">Clique para ligar/desligar o destaque.</div>
-      </div>
-    </div>
-
-    <div class="card" style="margin-top:10px;background:rgba(10,19,38,.35)">
-      <b>Cursos (etapa 2)</b>
-      <div id="cfgCursos" style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap"></div>
-      <div class="small">Clique para ligar/desligar o destaque.</div>
-    </div>
-
-    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px">
-      <button class="main ghost" onclick="renderAdmin()">Atualizar Lista</button>
-      <button class="main ghost" onclick="exportCSV()">Exportar CSV</button>
-      <button class="main ghost" onclick="closeAdmin()">Fechar Admin</button>
-      <button class="main ghost" onclick="resetHighlights()">Resetar Destaques</button>
-    </div>
-
-    <table>
-      <thead>
-        <tr>
-          <th>Nome</th>
-          <th>Curso</th>
-          <th>Motivo</th>
-          <th>Modalidade</th>
-          <th>Score</th>
-        </tr>
-      </thead>
-      <tbody id="tbody"></tbody>
-    </table>
-  </div>
-
-</div>
-
-<!-- MODAL SENHA -->
-<div class="modal" id="modal">
-  <div class="modalContent">
-    <h3 style="margin:0 0 8px 0">Acesso Admin</h3>
-    <p class="sub">Digite a senha do administrador.</p>
-    <input id="senha" type="password" placeholder="Senha" style="margin-top:10px">
-    <div style="display:flex;gap:10px;margin-top:12px;flex-wrap:wrap">
-      <button class="main" onclick="login()">Entrar</button>
-      <button class="main ghost" onclick="modal.style.display='none'">Cancelar</button>
-    </div>
-  </div>
-</div>
-
-<script>
-  const ADMIN_PASS = "57014510250113";
-  const STORAGE_LEADS = "leads_funil_v4";
-  const STORAGE_CFG = "funil_cfg_v2";
-
-  const OPT_MOTIVOS = ["Bolsas","Valores","Cursos","Matrícula"];
-  const OPT_CURSOS = [
-    "Administração","Ciências Contábeis","Direito","Enfermagem","Farmácia","Fisioterapia",
-    "Fonoaudiologia","Medicina Veterinária","Nutrição","Odontologia","Psicologia","Terapia Ocupacional"
-  ];
-  const OPT_MODS = ["Presencial","Semi-presencial","EAD"];
-
-  const chatBox = document.getElementById("chatBox");
-  const quick = document.getElementById("quick");
-  const state = {motivo:"",curso:"",modalidade:""};
-
-  // ✅ Config com “interruptor mestre”
-  function defaultCfg(){
-    return { enabled:false, motivos:[], cursos:[], modalidades:[] };
-  }
-  function loadCfg(){
-    try{
-      const raw = localStorage.getItem(STORAGE_CFG);
-      if(!raw) return defaultCfg();
-      const cfg = JSON.parse(raw);
-      return {
-        enabled: !!cfg.enabled,
-        motivos: Array.isArray(cfg.motivos) ? cfg.motivos : [],
-        cursos: Array.isArray(cfg.cursos) ? cfg.cursos : [],
-        modalidades: Array.isArray(cfg.modalidades) ? cfg.modalidades : []
-      };
-    }catch{
-      return defaultCfg();
-    }
-  }
-  function saveCfg(cfg){ localStorage.setItem(STORAGE_CFG, JSON.stringify(cfg)); }
-
-  function highlightsEnabled(){
-    return loadCfg().enabled === true;
-  }
-  function isHighlighted(group, value){
-    const cfg = loadCfg();
-    if(!cfg.enabled) return false; // ✅ NUNCA destaca se o ADM não ligou
-    return (cfg[group] || []).includes(value);
-  }
-  function toggleHighlight(group, value){
-    const cfg = loadCfg();
-    const arr = cfg[group] || [];
-    const idx = arr.indexOf(value);
-    if(idx >= 0) arr.splice(idx,1);
-    else arr.push(value);
-    cfg[group] = arr;
-    saveCfg(cfg);
-  }
-  function setHighlightsEnabled(on){
-    const cfg = loadCfg();
-    cfg.enabled = !!on;
-    saveCfg(cfg);
-  }
-  function resetHighlights(){
-    saveCfg(defaultCfg());
-    renderCfgPanels();
-    start();
-    alert("Reset concluído: destaques DESLIGADOS e listas vazias.");
-  }
-
-  // Chat helpers
-  function bot(msg){
-    chatBox.innerHTML += `<div class="msg bot">${msg}</div>`;
-    chatBox.scrollTop = chatBox.scrollHeight;
-  }
-  function user(msg){
-    chatBox.innerHTML += `<div class="msg user">${msg}</div>`;
-    chatBox.scrollTop = chatBox.scrollHeight;
-  }
-  function setQuick(btns){
-    quick.innerHTML="";
-    btns.forEach(b=>{
-      const x=document.createElement("button");
-      x.className="qbtn" + (b.highlight ? " highlight" : "");
-      x.innerText=b.t;
-      x.onclick=b.f;
-      quick.appendChild(x);
-    });
-  }
-
-  function start(){
-    chatBox.innerHTML="";
-    state.motivo=""; state.curso=""; state.modalidade="";
-    bot("Qual seu objetivo agora?");
-    setQuick(OPT_MOTIVOS.map(v => ({
-      t:v,
-      highlight: isHighlighted("motivos", v),
-      f:()=>pickMotivo(v)
-    })));
-  }
-  function pickMotivo(v){
-    state.motivo=v; user(v);
-    bot("Qual curso você deseja?");
-    setQuick(OPT_CURSOS.map(c => ({
-      t:c,
-      highlight: isHighlighted("cursos", c),
-      f:()=>pickCurso(c)
-    })));
-  }
-  function pickCurso(v){
-    state.curso=v; user(v);
-    bot("Qual modalidade?");
-    setQuick(OPT_MODS.map(m => ({
-      t:m,
-      highlight: isHighlighted("modalidades", m),
-      f:()=>pickModal(m)
-    })));
-  }
-  function pickModal(v){
-    state.modalidade=v; user(v);
-    bot("Agora só seus dados para contato 😊");
-    // Continuar nunca destacado
-    setQuick([{t:"Continuar", highlight:false, f:goForm}]);
-  }
-
-  function goForm(){
-    document.getElementById("motivo").value=state.motivo;
-    document.getElementById("cursoHidden").value=state.curso;
-    document.getElementById("modalidadeHidden").value=state.modalidade;
-    document.getElementById("curso").value=state.curso;
-    document.getElementById("modalidade").value=state.modalidade;
-    document.getElementById("chatCard").style.display="none";
-    document.getElementById("formCard").style.display="block";
-  }
-  function backChat(){
-    document.getElementById("formCard").style.display="none";
-    document.getElementById("chatCard").style.display="block";
-    start();
-  }
-
-  // Leads
-  function calcScore(){
-    let s=0;
-    const tel=(telefone.value||"").replace(/\D/g,"");
-    if(tel.length>=10) s+=25;
-    if((cidade.value||"").trim()) s+=10;
-    if((email.value||"").includes("@")) s+=10;
-
-    const mv=document.getElementById("motivo").value;
-    if(mv==="Bolsas") s+=20;
-    else if(mv==="Matrícula") s+=18;
-    else if(mv==="Valores") s+=15;
-    else s+=10;
-
-    const mod=modalidade.value;
-    if(mod==="Presencial") s+=10;
-    else if(mod==="Semi-presencial") s+=9;
-    else if(mod==="EAD") s+=8;
-
-    const c=curso.value;
-    if(["Enfermagem","Direito","Psicologia","Fisioterapia","Odontologia","Fonoaudiologia","Terapia Ocupacional"].includes(c)) s+=5;
-    return Math.min(100,s);
-  }
-
-  function saveLead(){
-    if(!document.getElementById("lgpd").checked){ alert("Autorize LGPD"); return; }
-    if(!nome.value.trim()){ alert("Informe o nome"); return; }
-    if((telefone.value||"").replace(/\D/g,"").length < 10){ alert("Informe um WhatsApp válido com DDD"); return; }
-    if(!cidade.value.trim()){ alert("Informe a cidade"); return; }
-
-    const lead={
-      created_at: new Date().toISOString(),
-      nome:nome.value.trim(),
-      telefone:telefone.value.trim(),
-      cidade:cidade.value.trim(),
-      email:email.value.trim(),
-      curso:curso.value,
-      modalidade:modalidade.value,
-      motivo:document.getElementById("motivo").value,
-      score: calcScore()
-    };
-
-    const arr=JSON.parse(localStorage.getItem(STORAGE_LEADS)||"[]");
-    arr.push(lead);
-    localStorage.setItem(STORAGE_LEADS, JSON.stringify(arr));
-    alert("Cadastro enviado!");
-    nome.value=""; telefone.value=""; cidade.value=""; email.value="";
-    document.getElementById("lgpd").checked=false;
-    backChat();
-    if(document.getElementById("admin").style.display==="block") renderAdmin();
-  }
-
-  // Admin access
-  document.getElementById("openAdmin").onclick=()=>modal.style.display="flex";
-  document.addEventListener("keydown",(e)=>{
-    if(e.ctrlKey && e.altKey && (e.key==="a" || e.key==="A")) modal.style.display="flex";
-  });
-  function login(){
-    if(senha.value===ADMIN_PASS){
-      modal.style.display="none";
-      document.getElementById("admin").style.display="block";
-      renderCfgPanels();
-      renderAdmin();
-    } else alert("Senha incorreta");
-  }
-  function closeAdmin(){ document.getElementById("admin").style.display="none"; }
-
-  function escapeHtml(s){
-    return (s||"").replace(/[&<>"']/g, m => ({
-      "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
-    }[m]));
-  }
-
-  function renderAdmin(){
-    const arr=JSON.parse(localStorage.getItem(STORAGE_LEADS)||"[]");
-    document.getElementById("total").innerText=arr.length;
-    document.getElementById("quentes").innerText=arr.filter(l=>l.score>=70).length;
-    const tb=document.getElementById("tbody");
-    tb.innerHTML="";
-    arr.slice().reverse().forEach(l=>{
-      tb.innerHTML+=`
-        <tr>
-          <td>${escapeHtml(l.nome)}</td>
-          <td>${escapeHtml(l.curso)}</td>
-          <td>${escapeHtml(l.motivo)}</td>
-          <td>${escapeHtml(l.modalidade)}</td>
-          <td>${l.score}</td>
-        </tr>`;
-    });
-  }
-
-  function exportCSV(){
-    const arr=JSON.parse(localStorage.getItem(STORAGE_LEADS)||"[]");
-    let csv="Data;Nome;Telefone;Cidade;Email;Curso;Modalidade;Motivo;Score\n";
-    arr.forEach(l=>{
-      csv+=`${l.created_at};${l.nome};${l.telefone};${l.cidade};${l.email};${l.curso};${l.modalidade};${l.motivo};${l.score}\n`;
-    });
-    const a=document.createElement("a");
-    a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv"}));
-    a.download="leads.csv";
-    a.click();
-  }
-
-  // Admin highlight panels
-  function mkBadge(label, groupKey){
-    const el=document.createElement("span");
-    el.className="badge"+(isHighlighted(groupKey,label) ? " on" : "");
-    el.textContent=label;
-    el.onclick=()=>{
-      toggleHighlight(groupKey,label);
-      renderCfgPanels();
-      start(); // aplica no chat
-    };
-    return el;
-  }
-
-  function renderCfgPanels(){
-    const cfg=loadCfg();
-    const enable=document.getElementById("enableHighlights");
-    enable.checked = cfg.enabled;
-
-    enable.onchange = ()=>{
-      setHighlightsEnabled(enable.checked);
-      renderCfgPanels();
-      start(); // ✅ se desligar, some todo azul imediatamente
-    };
-
-    const m=document.getElementById("cfgMotivos");
-    const c=document.getElementById("cfgCursos");
-    const md=document.getElementById("cfgMods");
-    m.innerHTML=""; c.innerHTML=""; md.innerHTML="";
-    OPT_MOTIVOS.forEach(v=>m.appendChild(mkBadge(v,"motivos")));
-    OPT_CURSOS.forEach(v=>c.appendChild(mkBadge(v,"cursos")));
-    OPT_MODS.forEach(v=>md.appendChild(mkBadge(v,"modalidades")));
-  }
-
-  // init: por padrão destaques desativados
-  // (mesmo que exista sujeira antiga, o interruptor manda)
-  if(!localStorage.getItem(STORAGE_CFG)){
-    saveCfg(defaultCfg());
-  }
-
-  start();
-</script>
-</body>
-</html>
 <!doctype html>
 <html lang="pt-br">
 <head>
@@ -681,7 +66,7 @@ h1{ margin:0; font-size:var(--h1); line-height:1.1; }
   cursor:pointer;
 }
 
-/* ✅ WIZARD (1 pergunta por vez) */
+/* ✅ MODO 1 PERGUNTA POR VEZ */
 .stepWrap{
   background:rgba(10,19,38,.55);
   border:1px solid rgba(31,51,90,.65);
@@ -724,12 +109,12 @@ h1{ margin:0; font-size:var(--h1); line-height:1.1; }
   flex: 0 1 auto;
 }
 .qbtn:active{ transform: scale(.99); }
-/* ✅ Destaque só se ADM ligar + marcar */
 .qbtn.highlight{
   background:linear-gradient(135deg,var(--accent),#1a7cff);
   color:#061023;
   border:none;
 }
+
 @media(max-width:720px){
   .answers .qbtn{ flex: 1 1 calc(50% - var(--gap)); } /* 2 colunas */
 }
@@ -737,8 +122,11 @@ h1{ margin:0; font-size:var(--h1); line-height:1.1; }
   .answers .qbtn{ flex: 1 1 100%; } /* 1 coluna */
 }
 
-/* resumo discreto */
-.summary{ display:flex; gap:8px; flex-wrap:wrap; margin-top:12px; }
+/* ✅ resumo discreto (chips) */
+.summary{
+  display:flex; gap:8px; flex-wrap:wrap;
+  margin-top:12px;
+}
 .chip{
   display:inline-flex; align-items:center; gap:6px;
   padding:6px 10px; border-radius:999px;
@@ -787,7 +175,7 @@ button.main{
 button.ghost{
   background:transparent;
   border:1px solid rgba(31,51,90,.85);
-  color:var(--text)
+  color:var(--text);
 }
 
 /* ADMIN */
@@ -820,6 +208,7 @@ button.ghost{
   color:#cfeeff;
   background:rgba(53,195,255,.10);
 }
+
 .switchLine{
   display:flex; align-items:center; gap:10px; flex-wrap:wrap;
   margin-top:10px;
@@ -881,13 +270,13 @@ th{ color:var(--muted); font-weight:800; }
       <div class="logo"></div>
       <div>
         <h1>Captação Ensino Superior</h1>
-        <p class="sub">1 pergunta por vez • responsivo • senha não aparece no código</p>
+        <p class="sub">1 pergunta por vez • destaque só se o ADM ligar</p>
       </div>
     </div>
     <button class="secret" id="openAdmin" title=" " aria-label="Admin"></button>
   </div>
 
-  <!-- WIZARD -->
+  <!-- ✅ WIZARD (1 pergunta por vez) -->
   <div class="card" id="wizardCard">
     <div class="stepWrap">
       <div class="stepTop">
@@ -899,14 +288,16 @@ th{ color:var(--muted); font-weight:800; }
       </div>
 
       <div class="answers" id="answers"></div>
+
+      <!-- resumo discreto (não é histórico, é só um “status”) -->
       <div class="summary" id="summary" style="display:none"></div>
 
       <div class="actions" style="margin-top:14px">
-        <button class="main ghost" id="btnRestart" style="padding:10px 12px;font-weight:800">Reiniciar</button>
+        <button class="ghost main" id="btnRestart" style="padding:10px 12px;font-weight:800">Reiniciar</button>
       </div>
 
       <p class="sub" style="margin-top:10px">
-        *Nada fica em destaque automaticamente. Se algo estiver em evidência, foi definido pelo administrador.
+        *Nada fica em destaque automaticamente. Se estiver em evidência, foi definido pelo administrador.
       </p>
     </div>
   </div>
@@ -927,7 +318,7 @@ th{ color:var(--muted); font-weight:800; }
       </div>
       <div>
         <label>WhatsApp*</label>
-        <input id="telefone" placeholder="(DD) 9XXXX-XXXX">
+        <input id="telefone">
       </div>
     </div>
 
@@ -1028,7 +419,6 @@ th{ color:var(--muted); font-weight:800; }
       <button class="main ghost" onclick="exportCSV()">Exportar CSV</button>
       <button class="main ghost" onclick="closeAdmin()">Fechar Admin</button>
       <button class="main ghost" onclick="resetHighlights()">Resetar Destaques</button>
-      <button class="main ghost" onclick="logoutAdmin()">Sair</button>
     </div>
 
     <table>
@@ -1050,30 +440,23 @@ th{ color:var(--muted); font-weight:800; }
     <p class="sub">Digite a senha do administrador.</p>
     <input id="senha" type="password" placeholder="Senha" style="margin-top:10px">
     <div class="actions">
-      <button class="main" id="btnLogin">Entrar</button>
+      <button class="main" onclick="login()">Entrar</button>
       <button class="main ghost" onclick="modal.style.display='none'">Cancelar</button>
     </div>
-    <p class="sub" style="margin-top:10px">*A senha não fica escrita no código; é validada por hash SHA-256.</p>
   </div>
 </div>
 
 <script>
-// =======================
-// CONFIG (sem senha em texto puro)
-// =======================
-// SHA-256("57014510250113") = 153c64b9fc876a9e50c389daff2cb4f2d021f57afdc4b40ae6abd3516772aafc
-const ADMIN_PASS_SHA256 = "153c64b9fc876a9e50c389daff2cb4f2d021f57afdc4b40ae6abd3516772aafc";
+const ADMIN_PASS="57014510250113";
+const STORAGE_LEADS="leads_funil_wizard_v1";
+const STORAGE_CFG="funil_cfg_wizard_v1";
 
-const STORAGE_LEADS = "leads_funil_wizard_sha_v1";
-const STORAGE_CFG   = "funil_cfg_wizard_sha_v1";
-const SESSION_KEY   = "admin_authed_v1"; // sessionStorage
-
-const OPT_MOTIVOS = ["Bolsas","Valores","Cursos","Matrícula"];
-const OPT_CURSOS  = [
+const OPT_MOTIVOS=["Bolsas","Valores","Cursos","Matrícula"];
+const OPT_CURSOS=[
   "Administração","Ciências Contábeis","Direito","Enfermagem","Farmácia","Fisioterapia",
   "Fonoaudiologia","Medicina Veterinária","Nutrição","Odontologia","Psicologia","Terapia Ocupacional"
 ];
-const OPT_MODS    = ["Presencial","Semi-presencial","EAD"];
+const OPT_MODS=["Presencial","Semi-presencial","EAD"];
 
 // Wizard elements
 const questionTitle = document.getElementById("questionTitle");
@@ -1084,19 +467,7 @@ document.getElementById("btnRestart").onclick = ()=>startWizard(true);
 
 const state = { step:1, motivo:"", curso:"", modalidade:"" };
 
-// =======================
-// SHA-256 helper (WebCrypto)
-// =======================
-async function sha256Hex(text) {
-  const data = new TextEncoder().encode(text);
-  const hashBuffer = await crypto.subtle.digest("SHA-256", data);
-  const hashArray = Array.from(new Uint8Array(hashBuffer));
-  return hashArray.map(b => b.toString(16).padStart(2, "0")).join("");
-}
-
-// =======================
-// Highlight config (admin controls)
-// =======================
+// ====== Highlights config (admin controls)
 function defaultCfg(){ return {enabled:false, motivos:[], cursos:[], modalidades:[]}; }
 function loadCfg(){
   try{ return JSON.parse(localStorage.getItem(STORAGE_CFG)) || defaultCfg(); }
@@ -1104,7 +475,7 @@ function loadCfg(){
 }
 function saveCfg(cfg){ localStorage.setItem(STORAGE_CFG, JSON.stringify(cfg)); }
 function isHighlighted(group, value){
-  const cfg = loadCfg();
+  const cfg=loadCfg();
   if(!cfg.enabled) return false;
   return (cfg[group]||[]).includes(value);
 }
@@ -1125,9 +496,7 @@ function resetHighlights(){
   alert("Reset: destaques desligados.");
 }
 
-// =======================
-// Wizard (1 pergunta por vez)
-// =======================
+// ====== Wizard rendering (1 pergunta por vez)
 function setStep(title, options, groupKey, onPick){
   questionTitle.textContent = title;
   answers.innerHTML = "";
@@ -1142,52 +511,64 @@ function setStep(title, options, groupKey, onPick){
   renderSummary();
   window.scrollTo({top:0, behavior:"smooth"});
 }
+
 function renderSummary(){
   const items = [];
   if(state.motivo) items.push({k:"Motivo", v:state.motivo});
   if(state.curso) items.push({k:"Curso", v:state.curso});
   if(state.modalidade) items.push({k:"Modalidade", v:state.modalidade});
+
   if(items.length === 0){
-    summary.style.display="none";
-    summary.innerHTML="";
+    summary.style.display = "none";
+    summary.innerHTML = "";
     return;
   }
-  summary.style.display="flex";
+  summary.style.display = "flex";
   summary.innerHTML = items.map(i => `<span class="chip"><b>${i.k}:</b> ${escapeHtml(i.v)}</span>`).join("");
 }
+
 function renderStep(){
   if(state.step === 1){
     setStep("Qual seu objetivo agora?", OPT_MOTIVOS, "motivos", (v)=>{
-      state.motivo=v; state.step=2; renderStep();
+      state.motivo = v;
+      state.step = 2;
+      renderStep();
     });
     return;
   }
   if(state.step === 2){
     setStep("Qual curso você deseja?", OPT_CURSOS, "cursos", (v)=>{
-      state.curso=v; state.step=3; renderStep();
+      state.curso = v;
+      state.step = 3;
+      renderStep();
     });
     return;
   }
   if(state.step === 3){
     setStep("Qual modalidade você prefere?", OPT_MODS, "modalidades", (v)=>{
-      state.modalidade=v; goForm();
+      state.modalidade = v;
+      goForm();
     });
     return;
   }
 }
+
 function startWizard(resetAll){
   state.step = 1;
-  if(resetAll){ state.motivo=""; state.curso=""; state.modalidade=""; }
+  if(resetAll){
+    state.motivo = "";
+    state.curso = "";
+    state.modalidade = "";
+  }
   renderStep();
 }
 
-// =======================
-// Form navigation
-// =======================
+// ====== Form navigation
 function goForm(){
   motivo.value = state.motivo;
   cursoHidden.value = state.curso;
   modalidadeHidden.value = state.modalidade;
+
   curso.value = state.curso;
   modalidade.value = state.modalidade;
 
@@ -1198,13 +579,12 @@ function goForm(){
 function backWizard(){
   formCard.style.display="none";
   wizardCard.style.display="block";
-  state.step = 3; // volta para modalidade
+  // volta para etapa 3 (modalidade) por padrão, mantendo escolhas anteriores
+  state.step = 3;
   renderStep();
 }
 
-// =======================
-// Lead saving
-// =======================
+// ====== Lead saving
 function calcScore(){
   let s=0;
   const tel=(telefone.value||"").replace(/\D/g,"");
@@ -1250,6 +630,7 @@ function saveLead(){
   alert("Cadastro enviado!");
   nome.value=""; telefone.value=""; cidade.value=""; email.value=""; lgpd.checked=false;
 
+  // reinicia wizard limpando tudo
   formCard.style.display="none";
   wizardCard.style.display="block";
   startWizard(true);
@@ -1257,73 +638,21 @@ function saveLead(){
   if(admin.style.display==="block") renderAdmin();
 }
 
-// =======================
-// Admin auth (SHA-256 + session)
-// =======================
-function isAuthed(){
-  return sessionStorage.getItem(SESSION_KEY)==="1";
-}
-function requireAuth(){
-  if(!isAuthed()){
-    admin.style.display="none";
-    return false;
-  }
-  return true;
-}
-function setAuthed(on){
-  if(on) sessionStorage.setItem(SESSION_KEY,"1");
-  else sessionStorage.removeItem(SESSION_KEY);
-}
-
-openAdmin.onclick = ()=> {
-  // sempre pede senha (não “auto abre”)
-  senha.value = "";
-  modal.style.display="flex";
-};
-
+// ====== Admin
+openAdmin.onclick=()=>modal.style.display="flex";
 document.addEventListener("keydown",(e)=>{
-  if(e.ctrlKey && e.altKey && (e.key==="a" || e.key==="A")){
-    senha.value = "";
-    modal.style.display="flex";
-  }
+  if(e.ctrlKey && e.altKey && (e.key==="a" || e.key==="A")) modal.style.display="flex";
 });
-
-// botão entrar
-document.getElementById("btnLogin").onclick = login;
-
-// 🔐 Login com SHA-256 (senha não fica no código em texto)
-async function login(){
-  const input = (senha.value || "").trim();
-  if(!input){ alert("Digite a senha"); return; }
-
-  try{
-    const h = await sha256Hex(input);
-    if(h === ADMIN_PASS_SHA256){
-      setAuthed(true);
-      modal.style.display="none";
-      admin.style.display="block";
-      renderCfgPanels();
-      renderAdmin();
-    }else{
-      alert("Senha incorreta");
-    }
-  }catch(err){
-    console.error(err);
-    alert("Erro ao validar senha neste navegador.");
-  }
+function login(){
+  if(senha.value===ADMIN_PASS){
+    modal.style.display="none";
+    admin.style.display="block";
+    renderCfgPanels();
+    renderAdmin();
+  } else alert("Senha incorreta");
 }
-
-function logoutAdmin(){
-  setAuthed(false);
-  admin.style.display="none";
-  alert("Você saiu do admin.");
-}
-
 function closeAdmin(){ admin.style.display="none"; }
 
-// =======================
-// Admin render + export
-// =======================
 function escapeHtml(s){
   return (s||"").replace(/[&<>"']/g, m => ({
     "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
@@ -1331,7 +660,6 @@ function escapeHtml(s){
 }
 
 function renderAdmin(){
-  if(!requireAuth()) return;
   const arr=JSON.parse(localStorage.getItem(STORAGE_LEADS)||"[]");
   total.innerText=arr.length;
   quentes.innerText=arr.filter(l=>l.score>=70).length;
@@ -1351,7 +679,6 @@ function renderAdmin(){
 }
 
 function exportCSV(){
-  if(!requireAuth()) return;
   const arr=JSON.parse(localStorage.getItem(STORAGE_LEADS)||"[]");
   let csv="Data;Nome;Telefone;Cidade;Email;Curso;Modalidade;Motivo;Score\n";
   arr.forEach(l=>{
@@ -1363,46 +690,34 @@ function exportCSV(){
   a.click();
 }
 
-// =======================
 // Highlights panel
-// =======================
 function mkBadge(label, groupKey){
   const el=document.createElement("span");
   el.className="badge"+(isHighlighted(groupKey,label) ? " on" : "");
   el.textContent=label;
   el.onclick=()=>{
-    if(!requireAuth()) return;
     toggleHighlight(groupKey,label);
     renderCfgPanels();
-    renderStep();
+    renderStep(); // aplica no wizard imediatamente
   };
   return el;
 }
-
 function renderCfgPanels(){
-  if(!requireAuth()) return;
   const cfg=loadCfg();
   enableHighlights.checked = !!cfg.enabled;
-
   enableHighlights.onchange = ()=>{
-    if(!requireAuth()) return;
     setHighlightsEnabled(enableHighlights.checked);
     renderCfgPanels();
     renderStep(); // se desligar, some azul imediatamente
   };
-
   cfgMotivos.innerHTML=""; cfgCursos.innerHTML=""; cfgMods.innerHTML="";
   OPT_MOTIVOS.forEach(v=>cfgMotivos.appendChild(mkBadge(v,"motivos")));
   OPT_CURSOS.forEach(v=>cfgCursos.appendChild(mkBadge(v,"cursos")));
   OPT_MODS.forEach(v=>cfgMods.appendChild(mkBadge(v,"modalidades")));
 }
 
-// init config
-if(!localStorage.getItem(STORAGE_CFG)){
-  localStorage.setItem(STORAGE_CFG, JSON.stringify(defaultCfg()));
-}
-
-// start wizard
+// init
+if(!localStorage.getItem(STORAGE_CFG)) localStorage.setItem(STORAGE_CFG, JSON.stringify(defaultCfg()));
 startWizard(true);
 </script>
 </body>
